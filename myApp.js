@@ -1,12 +1,36 @@
 require('dotenv').config();
-const mongoose = request('mongoose');
+const mongoose = require('mongoose');
 
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-let Person;
+const MONGO_URI = `mongodb+srv://${process.env.MONGO_URI_DB_USERNAME}:${process.env.MONGO_URI_DB_PASSWORD}@${process.env.MONGO_URI_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`
 
-const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Successfully connected to MongoDB.'))
+  .catch((error) => console.error('MongoDB connection error:', error));
+
+
+const personSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  age: Number,
+  favoriteFoods: [String]
+});
+
+let Person = mongoose.model('Person', personSchema); // Create a Model
+
+const createAndSavePerson = (done) => { // Create and Save a Record of a Model
+  const person = new Person({
+    name: 'Karim',
+    age: 26,
+    favoriteFoods: ['pizza', 'sushi']
+  });
+  person.save(function (err, data) {
+    if (err) return done(err);
+    console.log(data);
+    done(null, data);
+  });
 };
 
 const createManyPeople = (arrayOfPeople, done) => {
